@@ -1,0 +1,164 @@
+/* Image Processing Algorithm for Detection of Crude Oil Spills from Visible Images in the Oil and Gas Industry.
+
+This software is owned fully by Dr. Jason M. Zara, Dr. Erkinay Abliz, Dr. Vesna Zderic, Dr. Murray H. Loew,
+Dr. Ahmed Jendoubi, Dr. Mohammed Chouikha, Dr. Shani Ross, Dr. Gary Harris, Mr. James Griffin, Engineer Francis Olawuyi,
+Dr. Matthew Olawuyi, Engineer Joshua Olawuyi, Engineer Deborah Olawuyi, Engineer Joseph Olawuyi, Dr. Michael Olawuyi
+Honorable Damilola Sunday Olawuyi and Dr. Esther Olawuyi.
+
+OLAWUYI RACETT NIGERIA LTD.,
+KEMP HOUSE, 160 CITY ROAD,
+EC1V 2NX, LONDON, UNITED KINGDOM
+https://www.olawuyiracettnigerialtd.com
+tegae@gwmail.gwu.edu
+July 20, 2023
+*/
+
+1.
+Case (h = 681)
+PreprocessedImage = InitialImage(:,1:h - 100);
+Case (h = 844)
+PreprocessedImage = InitialImage (:,1:h - 70);
+end
+2.
+For(int i = 1; i < w; i++)
+For(int j = 1; j < h; j++)
+If (PreprocessedImage(i,j,1) > VT1A && PreprocessedImage(i,j,1) < VT1B &&
+PreprocessedImage(i,j,2) >VT2A && PreprocessedImage(i,j,2) < VT2B &&
+PreprocessedImage(i,j,3) > VT3A && PreprocessedImage(i,j,3) < VT3B)
+VSegmentedImage(i,j,1) = 0;
+VSegmentedImage(i,j,2) = 0;
+VSegmentedImage(i,j,3) = 0;
+else
+VSegmentedImage(i,j,1) = PreprocessedImage(i,j,1);
+VSegmentedImage(i,j,2) = PreprocessedImage(i,j,2);
+VSegmentedImage(i,j,3) = PreprocessedImage(i,j,3);
+end
+end
+where
+w = Image width
+h = Image height
+VT1A = minimum threshold for R component of green color identifying vegetation
+VT1B = maximum threshold for R component of green color identifying vegetation
+VT2A = minimum threshold for G component of green color identifying vegetation
+VT2B = maximum threshold for G component of green color identifying vegetation
+VT3A = minimum threshold for B component of green color identifying vegetation
+VT3B = maximum threshold for B component of green color identifying vegetation
+3.
+For(int i = 1; i < w; i++)
+For(int j = 1; j < h; j++)
+If (VSegmentedImage(i,j,1) > ST1A && VSegmentedImage (i,j,1) < ST1B &&
+VSegmentedImage (i,j,2) >ST2A && VSegmentedImage (i,j,2) < ST2B &&
+VSegmentedImage (i,j,3) > ST3A && VSegmentedImage (i,j,3) < ST3B)
+SkySegmentedImage(i,j,1) = 0;
+SkySegmentedImage(i,j,2) = 0;
+SkySegmentedImage(i,j,3) = 0;
+else
+SkySegmentedImage(i,j,1) = VSegmentedImage(i,j,1);
+SkySegmentedImage(i,j,2) = VSegmentedImage(i,j,2);
+SKySegmentedImage(i,j,3) = VSegmentedImage(i,j,3);
+end
+end
+
+where
+w = Image width
+h = Image height
+ST1A = minimum threshold for R component of blue and white color identifying sky
+ST1B = maximum threshold for R component of blue and white color identifying sky
+ST2A = minimum threshold for G component of blue and white color identifying sky
+ST2B = maximum threshold for G component of blue and white color identifying sky
+ST3A = minimum threshold for B component of blue and white color identifying sky
+ST3B = maximum threshold for B component of blue and white color identifying sky
+4.
+maxI = 0;
+GSkySegmentedImage = rgb2gray(SkySegmentedImage);
+ROIImage = bwlabel(SkySegmentedImage);
+Stats = regionprops(ROIImage, ‘Area’);
+idx = find([stats.Area] > AT;
+BW2 = ismember(labelmatrix(ROIImage), idx);
+for(int i= 1; i <= idx; i++)
+if maxI < idx(i).Area
+maxI = idx(i);
+end
+ROI = ismember(labelmatrix(ROIImage), maxI);
+AT = minimum threshold for size of ROI Area
+
+5.
+For(int i = 2; i< w - 1; i++)
+For(int j = 2; j < h - 1; j+++)
+average =round {[ p(i,j) + p(i - 1,j) + p(I + 1,j) + p(i,j - 1) + p(i,j + 1)
++ p(i - 1,j - 1) + p(i - 1,j + 1) + p(i+1,j - 1)
++ p(I + 1,j + 1)]/9};
+If(abs(average -- p(I,j)) < HR
+HImage(i,j) = ROI(i,j);
+else
+HImage = 0;
+end
+end
+end
+HImage2 = bwlabel(HImage);
+Stats = regionprops(HImage2, ‘Area’);
+idx = find([stats.Area] > AT;
+BW2 = ismember(labelmatrix(HImage2), idx);
+for(int i= 1; i <= idx; i++)
+if maxI < idx(i).Area
+maxI = idx(i);
+end
+FinalHImage = ismember(labelmatrix(HImage2), maxI);
+HR = Homogeneity Threshold
+EImage = entropyfilt(ROI);
+For(int i = 1; i< w; i++)
+For(int j = 1; j < h; j+++)
+If(EImage(i,j) > ET1 and EImage(i,j) < ET2)
+EImage2(i,j) = ROI(i,j);
+else
+EImage2(i,j) = 0;
+end
+end
+end
+ET1 = minimum threshold for Entropy, expressed as a percentage of maximum Entropy Value
+in Image
+ET2 = maximum threshold for Entropy, expressed as a percentage of maximum Entropy Value
+in Image
+PSDImage = log10(abs(fftshif(fft2(ROI))).ˆ2));
+For(int i = 1; i< w; i++)
+For(int j = 1; j < h; j+++)
+If(PSDImage(i,j) > PSDT1 and PSDImage(i,j) < PSDT2)
+PSDImage2(i,j) = ROI(i,j);
+else
+PSDImage2(i,j) = 0;
+end
+end
+end
+PSDT1 = minimum threshold for PSD, expressed as a percentage of maximum PSD Value
+in Image
+PSDT2 = maximum threshold for PSD, expressed as a percentage of maximum PSD Value
+in Image
+6.
+For(int i = 1; i< w; i++)
+For(int j = 1; j < h; j+++)
+If (FinalHImage(i,j) > 0) || (EImage2(i,j) > 0)
+ROHE(i,j) = ROI(i,j);
+else
+ROHE(i,j) = 0;
+end
+end
+end
+ROHEmean = mean(mean(ROHE));
+For(int i = 1; i< w; i++)
+For(int j = 1; j < h; j+++)
+If (PSDImage2(i,j) > ROHEmean)
+TPSDImage(i,j) = PSDImage2(i,j);
+else
+TPSDImage(i,j) = 0;
+end
+end
+end
+For(int i = 1; i< w; i++)
+For(int j = 1; j < h; j+++)
+If (ROHE(i,j) > 0) || (TPSDImage(i,j) > 0)
+OilSpill(i,j) = ROI(i,j);
+else
+OilSpill(i,j) = 0;
+end
+end
+end
