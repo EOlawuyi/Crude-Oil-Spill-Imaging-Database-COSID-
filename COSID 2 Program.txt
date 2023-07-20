@@ -1,0 +1,101 @@
+/* Image Processing Algorithm for Detection of Crude Oil Spills from Visible Images in the Oil and Gas Industry.
+This software is owned fully by Dr. Jason M. Zara, Dr. Erkinay Abliz, Dr. Vesna Zderic, Dr. Murray H. Loew,
+Dr. Ahmed Jendoubi, Dr. Mohammed Chouikha, Dr. Shani Ros, Dr. Gary Harris, Mr. James Griffin, Engineer Francis Olawuyi,
+Dr. Matthew Olawuyi, Engineer Joshua Olawuyi, Engineer Deborah Olawuyi, Engineer Joseph Olawuyi, Dr. Michael Olawuyi,
+Honorable Damilola Sunday Olawuyi and Dr. Esther Olawuyi.
+
+OLAWUYI RACETT NIGERIA LTD.,
+KEMP HOUSE, 160 CITY ROAD,
+EC1V 2NX, LONDON, UNITED KINGDOM
+https://www.olawuyiracettnigerialtd.com
+tegae@gwmail.gwu.edu
+July 20, 2023
+
+*/
+
+% read in original documented crude oil spill image
+A = imread('IMG_20200218_095108.jpg');
+% perform image pre-processing to remove label pixels in the image.
+B = A(1: labelrow, 1:labelheight,:);
+% load the three crude oil filters designed and developed from % documented spill images
+oilfilter1 = imread('OSFILTER1.jpg');
+oilfilter2 = imread('OSFILTER2.jpg');
+oilfilter3 = imread('OSFILTER3.jpg');
+[aa bb cc] = size(B); 
+C = rgb2gray(B); 
+D = B
+for i=1:25:aa
+
+% Performing Color Cross Correlation
+averageR = mean(mean(B(i:i+25,j:j+25,1)));
+averageG = mean(mean(B(i:i+25,j:j+25,2)));
+averageB = mean(mean(B(i:i+25,j:j+25,3)));
+if(((abs(averageR - oilfilter1R)) > Ct) && ((abs(averageG - oilfilter1G)) > Ct) && ((abs(averageB - oilfilter1B)) > Ct))
+count = 0;
+% Performing Homogeneity Correlation
+for k=i:i+25
+for l=j:j+25
+homogeneity = ((C(k,k) + C(k-1,l) + C(k+1,l) + C(k,l-1) + C(k-1,l-1) + C(k+1,l-1) + C(k,l+1) + C(k-1,l+1) + C(k+1,l+1))/9);
+if(abs((C(k,l)) - homogeneity) < Ht)
+hcount++; end
+end
+end
+hpercent = hcount/(25*25);
+if((abs(hpercent - oilfilter1hpercent)) < 2)
+% Performing Power Spectrum Density Cross Correlation
+PSD = log10(abs(fftshift(fft2(C(i:i+25,j:j+25))))2);
+if( abs(max(max(PSD) - max(max(oilfilter1PSD))) < PSDt)
+% leave this image block as it contains crude % oil spill
+else
+for k=i:i+25
+for l=j:j+25
+D(k,l,1) = 0;
+D(k,l,2) = 0;
+D(k,l,3) = 0;
+end
+end
+end
+else
+for k=i:i+25
+for l=j:j+25
+D(k,l,1) = 0;
+D(k,l,2) = 0;
+D(k,l,3) = 0;
+end
+end
+end
+else
+for k=i:i+25
+for l=j:j+25
+D(k,l,1) = 0;
+D(k,l,2) = 0;
+D(k,l,3) = 0;
+end
+end
+end
+for j=1: 25:bb
+
+% Performing Color Cross Correlation
+averageR = mean(mean(B(i:i+25,j:j+25,1)));
+end
+end
+% connect neighboring pixels that contain crude oil spills
+E = rgb2gray(D);
+Spillimage = bwlabel(E);
+stats = regionprops(Himage,'Area');
+% select only pixel groups with sizes greater than 5,000 pixels
+idx = find([stats.Area] > 5000);
+CC= bwconncomp(Spillimage);
+BW2 = ismember(labelmatrix(CC), idx);
+% display final crude oil spill image with detected crude oil spills
+F = B;
+for i=1:aa
+for j=1:bb
+if(BW2(i,j) > 0)
+else
+F(i,j,1) = 0; F(i,j,2) = 0; F(i,j,3) = 0;
+end
+end
+end
+figure;imshow(F);hold on;
+title('Detected Crude Oil Spill');
